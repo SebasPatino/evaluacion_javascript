@@ -1,16 +1,24 @@
 {
   "name": "evaluacion_java",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "",
+  "homepage": "https://github.com/SebasPatino/evaluacion_javascript#readme",
+  "bugs": {
+    "url": "https://github.com/SebasPatino/evaluacion_javascript/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SebasPatino/evaluacion_javascript.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "prompt-sync": "^4.2.0"
   },
-  "devDependencies": {},
-  "description": ""
+  "devDependencies": {}
 }
