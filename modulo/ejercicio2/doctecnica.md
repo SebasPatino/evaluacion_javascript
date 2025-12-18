@@ -3,10 +3,10 @@ DOCUMENTACIÓN TÉCNICA COMPLETA
 1. Datos de entrada
     - Definición y tipos esperados
         - Operación (objeto):
-        - id: string o number.
-        - valores: array de numbers.
-        - tipo: string. Regla a aplicar sobre valores: "suma", "multiplicacion".
-        - activa: boolean. Controla si la operación será procesada.
+            - id: string o number.
+            - valores: array de numbers.
+            - tipo: string. Regla a aplicar sobre valores: "suma", "multiplicacion".
+            - activa: boolean. Controla si la operación será procesada.
 
     - Validaciones realizadas
         - Existencia de la operación:

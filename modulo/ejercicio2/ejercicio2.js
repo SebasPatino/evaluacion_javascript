@@ -75,6 +75,7 @@ function calcularResultado(op) {
     // elemento (valor actual): Es el elemento del arreglo que se está procesando en esa iteración.
     case "suma":
       // Suma acumulativa: reduce iniciando en 0
+      // .reduce se usa para reducir un array a un único valor, aplicando una función acumuladora a cada elemento de izquierda a derecha, devolviendo un valor final.
       return op.valores.reduce((total, elemento) => total + elemento, 0);
     case "multiplicacion":
       // Producto acumulativo: reduce iniciando en 1
@@ -182,6 +183,7 @@ export async function ejecutarOperaciones() {
   const resultados = [];
 
   // Ciclo elegido: 'for...of' => permite 'await' y mantiene el orden visual.
+  // op es un arreglo que representa cada operación dentro de operaciones.
   for (const op of operaciones) {
     // Procesar cada operación de forma asíncrona.
     // 'procesarOperacion(op)':

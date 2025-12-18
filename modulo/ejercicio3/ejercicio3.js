@@ -98,22 +98,37 @@ export function validarSolicitudConCallback(solicitud, callback) {
   }
 }
 
+// delay(ms) 
+// - Propósito: simular una espera asincrónica, como si dependiera de un servicio externo. 
+// - Entrada: ms (milisegundos a esperar). 
+// - Salida: Promesa que se resuelve después del tiempo indicado.
+// - Diseño: se usa setTimeout envuelto en una Promesa para integrarse con async/await
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// tiempoAleatorio()
+// - Propósito: generar un tiempo aleatorio de espera entre 300 y 2000 ms.
+// - Salida: número entero en milisegundos. 
+// - Diseño: se usa Math.random() para simular variabilidad en tiempos de respuesta.
 function tiempoAleatorio() {
   const min = 300;
   const max = 2000;
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// procesarSolicitudConPromesa(solicitud)  
+// procesar la solicitud validada usando el patrón de Promesas.
 export function procesarSolicitudConPromesa(solicitud) {
+  // Crea una promesa que resuelve con el resultado del procesamiento.
   return new Promise(async (resolve) => {
     try {
+      // Manejo de posibles errores durante el procesamiento. 
       // Simulamos tiempo de espera como si dependiera de un servicio externo
-      await delay(tiempoAleatorio());
+      await delay(tiempoAleatorio());   // Introduce latencia aleatoria para emular un servicio externo.
 
+      // Normaliza el tipo de servicio y evalúa reglas de negocio.
+      // toLowerCase() devuelve el valor en minúsculas de la cadena que realiza la llamada.
       switch (solicitud.tipoServicio.toLowerCase()) {
         case "instalacion":
         case "mantenimiento":
@@ -133,70 +148,108 @@ export function procesarSolicitudConPromesa(solicitud) {
             motivo: `Tipo de servicio no reconocido: ${solicitud.tipoServicio}`
           });
       }
+    // Si ocurre una excepción durante el procesamiento.
     } catch (err) {
+      // Resuelve con rechazo controlado (no se rechaza la promesa para simplificar el flujo).
       resolve({
+        // Combinación: op?.id ?? "desconocido"
+        // Primero intenta obtener op.id de forma segura.
+        // Si op no existe o id es undefined/null, entonces devuelve "desconocido".
+        // Así evitamos errores y siempre tenemos un valor válido para id.
         id: solicitud?.id ?? "desconocido",
         estado: "rechazada",
-        motivo: `Error: ${err.message}`
+        motivo: `Error: ${err.message}`   // Mensaje de error capturado.
       });
     }
   });
 }
 
+// Orquesta la validación y procesamiento usando async/await.
 export async function ejecutarSolicitudes() {
-  console.log("\nGestionando solicitudes de servicio (Ejercicio 3)");
+  console.log("\nGestionando solicitudes de servicio (Ejercicio 3)");   // Encabezado informativo en consola.
 
-  const solicitudes = arrSolicitudes(); // Datos de prueba
+  // Datos de prueba generados por la función auxiliar.
+  const solicitudes = arrSolicitudes();
+  // Acumula resultados individuales de cada solicitud.
   const resultados = [];
 
+  // Itera secuencialmente sobre cada solicitud del arreglo.
   for (const solicitud of solicitudes) {
+    // Captura errores inesperados en el flujo de cada iteración.
     try {
       // Validación con callback
+      // Envuelve el callback en una Promesa para usar await.
       const validada = await new Promise(resolve => {
+        // Invoca la validación y resuelve con el resultado controlado.
         validarSolicitudConCallback(solicitud, (err, res) => resolve(res));
       });
 
       // Si la validación devolvió directamente un resultado rechazado
+      // Detecta rechazo de negocio o error técnico convertido.
       if (validada.estado === "rechazada") {
+        // Registra el resultado rechazado para el resumen final.
         resultados.push(validada);
+        // Reporta en consola el motivo del rechazo.
         console.log(`Solicitud ${validada.id}: ${validada.estado} => ${validada.motivo}`);
+        // Pasa a la siguiente solicitud sin intentar procesamiento adicional.
         continue;
       }
 
       // Procesamiento con promesa
+      // Procesa la solicitud validada y espera el resultado.
       const resultado = await procesarSolicitudConPromesa(validada);
+      // Acumula el resultado (aprobada o rechazada) para el resumen.
       resultados.push(resultado);
-
+      // Reporta el resultado de procesamiento.
       console.log(`Solicitud ${resultado.id}: ${resultado.estado} => ${resultado.motivo}`);
-
+      
+      // Maneja cualquier error inesperado no capturado por las funciones internas.
     } catch (err) {
+      // Construye un objeto de resultado estandarizado para el error inesperado.
       const fallo = {
+        // Usa acceso seguro para obtener el id si está disponible.
+        // Combinación: op?.id ?? "desconocido"
+        // Primero intenta obtener op.id de forma segura.
+        // Si op no existe o id es undefined/null, entonces devuelve "desconocido".
+        // Así evitamos errores y siempre tenemos un valor válido para id.
         id: solicitud?.id ?? "desconocido",
-        estado: "rechazada",
-        motivo: `Error inesperado: ${err.message}`
+        estado: "rechazada",    // Marca como rechazado por falla inesperada.
+        motivo: `Error inesperado: ${err.message}`    // Mensaje con el detalle del error.
       };
+      // Registra el fallo para el resumen.
       resultados.push(fallo);
+      // Reporta la falla en consola.
       console.log(`Solicitud ${fallo.id}: ${fallo.estado} => ${fallo.motivo}`);
     }
   }
 
   // Resumen final
+  // Cuenta cuántas solicitudes fueron aprobadas.
+  // El método filter() crea un nuevo array con todos los elementos que cumplan la condición implementada por la función dada.
+  // r es simplemente el parámetro de la función flecha.
+  // Representa cada elemento del arreglo resultados mientras .filter(...) lo recorre.
   const aprobadas = resultados.filter(r => r.estado === "aprobada").length;
+  // Cuenta cuántas solicitudes fueron rechazadas.
   const rechazadas = resultados.filter(r => r.estado === "rechazada").length;
 
   console.log("\nResumen");
+  // Total de solicitudes gestionadas.
   console.log(`Solicitudes procesadas: ${resultados.length}`);
+  // Total de aprobadas.
   console.log(`Solicitudes aprobadas: ${aprobadas}`);
+  // Total de rechazadas
   console.log(`Solicitudes rechazadas: ${rechazadas}`);
 }
 
+// Genera y devuelve un arreglo de solicitudes de ejemplo.
 export function arrSolicitudes() {
+  // Devuelve un array con casos válidos y casos de error para cubrir todas las ramas.
   return [
-    { id: 1, cliente: "Carlos", tipoServicio: "instalacion", prioridad: 3, activo: true, fechaSolicitud: "2025-12-01" },
-    { id: 2, cliente: "Ana", tipoServicio: "mantenimiento", prioridad: 5, activo: true, fechaSolicitud: new Date() },
-    { id: 3, cliente: "", tipoServicio: "soporte", prioridad: 2, activo: true, fechaSolicitud: "2025-12-02" },              // error: cliente vacío
-    { id: 4, cliente: "Luis", tipoServicio: "auditoria", prioridad: 4, activo: true, fechaSolicitud: "2025-12-03" },        // tipo no reconocido
-    { id: 5, cliente: "Marta", tipoServicio: "soporte", prioridad: 7, activo: true, fechaSolicitud: "2025-12-04" },         // prioridad fuera de rango
-    { id: 6, cliente: "Pedro", tipoServicio: "instalacion", prioridad: 1, activo: false, fechaSolicitud: "2025-12-05" }     // inactiva
-  ];
-}
+    { id: 1, cliente: "Carlos", tipoServicio: "instalacion", prioridad: 3, activo: true, fechaSolicitud: "2025-12-01" },  // Caso válido: instalación, prioridad media, activo.
+    { id: 2, cliente: "Ana", tipoServicio: "mantenimiento", prioridad: 5, activo: true, fechaSolicitud: new Date() },     // Caso válido: mantenimiento, máxima prioridad, activo. new Date se usa para crear un objeto que representa la fecha y hora actuales
+    { id: 3, cliente: "", tipoServicio: "soporte", prioridad: 2, activo: true, fechaSolicitud: "2025-12-02" },            // Error: cliente vacío (será rechazado en validación).
+    { id: 4, cliente: "Luis", tipoServicio: "auditoria", prioridad: 4, activo: true, fechaSolicitud: "2025-12-03" },      // Tipo no reconocido (será rechazado en procesamiento).
+    { id: 5, cliente: "Marta", tipoServicio: "soporte", prioridad: 7, activo: true, fechaSolicitud: "2025-12-04" },       // Prioridad fuera de rango (será rechazado en validación).
+    { id: 6, cliente: "Pedro", tipoServicio: "instalacion", prioridad: 1, activo: false, fechaSolicitud: "2025-12-05" }   // Inactiva (rechazo inmediato por decisión de negocio).
+  ];  // Fin del retorno del arreglo de prueba.
+} // Fin de arrSolicitudes.
