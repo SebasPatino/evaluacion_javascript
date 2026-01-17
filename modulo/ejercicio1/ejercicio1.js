@@ -69,7 +69,8 @@ export function validarTransaccionConCallback(transaccion, callback) {
         }
 
         // 9) Éxito en validación estructural 
-        // return callback(null, transaccion);
+        return callback(null, transaccion);
+        
     } catch (err) {
         // 10) Manejo de errores de validación (controlados)
         return callback(null, {
