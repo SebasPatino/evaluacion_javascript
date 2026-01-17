@@ -3,7 +3,6 @@
 // - Procesarlas de forma asíncrona simulando tiempos variables.
 // - Demostrar tres enfoques de asincronía: callbacks, promesas y async/await.
 // - Reportar resultados claros y mantener la inmutabilidad.
-
 export function validarOperacion(op) {
 
   // Regla 1: la operación debe existir (no debe estar: null/undefined)
@@ -49,7 +48,6 @@ export function validarOperacion(op) {
 // delay(ms):
 // - Devuelve una Promesa que se resuelve luego de 'ms' milisegundos.
 // - Se usa para simular tiempos variables de procesamiento.
-
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
